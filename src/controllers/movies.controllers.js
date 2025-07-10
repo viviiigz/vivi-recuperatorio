@@ -1,4 +1,4 @@
-import Movie from "../models/characters.model.js";
+import Movie from "../models/movies.models.js";
 
 // obtener todos las peliculas
 export const getAllMovies = async (req, res) => {
@@ -20,18 +20,26 @@ export const getMovieById = async (req, res) => {
 export const createMovie = async (req, res) => {
   const { title, director, duration, genre, description } = req.body;
 
-  //validar que los campos obligatorios esten presentes
-  if (!title || !director || !duration || genre === undefined) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  // Validar que los campos obligatorios esten presentes y cumplan con los requisitos.
+  if (
+    title === undefined || title === null || title === "" ||
+    director === undefined || director === null || director === "" ||
+    genre === undefined || genre === null || genre === "" || // Si "" es un género válido, usa solo === undefined || === null
+    // Validación específica para duration: debe ser un número, entero y positivo (> 0)
+    typeof duration !== 'number' || !Number.isInteger(duration) || duration <= 0
+  ) {
+    return res.status(400).json({ error: "Faltan campos obligatorios o son inválidos. Asegúrate de que la duración sea un entero positivo." });
   }
-  //verificar si ya existe una pelicula con el mismo nombre
+
+  // Verificar si ya existe una pelicula con el mismo nombre (title debe ser único)
   const exists = await Movie.findOne({ where: { title } });
   if (exists) {
-    //si ya existe una pelicula con el mismo nombre, devolver un error
+    // Si ya existe una pelicula con el mismo nombre, devolver un error 400
     return res
       .status(400)
-      .json({ error: "Ya existe una pelicula con ese nombre" });
+      .json({ error: "Ya existe una pelicula con ese nombre." });
   }
+
   const movie = await Movie.create({
     title,
     director,
@@ -39,6 +47,7 @@ export const createMovie = async (req, res) => {
     genre,
     description,
   });
+  // Devolver la nueva película con status 201 (Created)
   res.status(201).json(movie);
 };
 
@@ -65,6 +74,7 @@ export const updateMovie = async (req, res) => {
       .status(400)
       .json({ error: "Ya existe una pelicula con ese nombre" });
   }
+
   //actualizar la pelicula
   movie.title = title;
   movie.director = director;

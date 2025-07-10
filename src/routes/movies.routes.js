@@ -6,7 +6,7 @@ import {
   createMovie,
   updateMovie,
   deleteMovie,
-} from "../controllers/movies.controller.js";
+} from "../controllers/movies.controllers.js";
 
 const router = Router();
 
